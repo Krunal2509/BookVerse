@@ -7,6 +7,7 @@ import com.service.bookverse.feature.auth.dto.RegisterRequestDto;
 import com.service.bookverse.feature.auth.dto.RegisterResponseDto;
 import com.service.bookverse.feature.auth.model.UserProfile;
 import com.service.bookverse.feature.auth.repository.UserRepository;
+import com.service.bookverse.feature.auth.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,9 @@ public class UserService {
     AppConfig appConfig;
 
     @Autowired
+    SecurityUtil securityUtil;
+
+    @Autowired
     AuthenticationManager authenticationManager;
 
     public ResponseEntity<RegisterResponseDto> register(RegisterRequestDto req) {
@@ -42,13 +46,17 @@ public class UserService {
         return new ResponseEntity<>(new RegisterResponseDto(req.getUsername()),HttpStatus.OK);
     }
 
-    public ResponseEntity<LoginResponseDto> login(LoginRequestDto request ){
+    public ResponseEntity<LoginResponseDto> login(LoginRequestDto request ) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
         if(authentication.isAuthenticated()){
             UserProfile userProfile = (UserProfile) authentication.getPrincipal();
 
-            LoginResponseDto loginResponseDto = new LoginResponseDto(userProfile.getId());
+            if(userProfile == null) throw new IllegalArgumentException("UserProfile Is NULL");
+
+            String jwtToken = securityUtil.getGeneratedToken(userProfile);
+
+            LoginResponseDto loginResponseDto = new LoginResponseDto(userProfile.getId(), jwtToken);
 
             return new ResponseEntity<>(loginResponseDto ,HttpStatus.OK);
         }

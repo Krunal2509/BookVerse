@@ -13,5 +13,6 @@ import java.util.Set;
 public class LoginResponseDto {
 
     private Integer id;
+    private String jwtToken;
 
 }
