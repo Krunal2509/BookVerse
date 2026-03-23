@@ -21,7 +21,7 @@ public class Cart
     private Integer id;
 
     @OneToOne
-    @JoinColumn(name = "id", nullable = false, unique = true)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private UserProfile userProfile;
 
     @OneToMany(mappedBy = "cart")
