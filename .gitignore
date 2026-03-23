@@ -37,6 +37,3 @@ build/
 
 ### yml ###
 src/main/resources/application.yml
-
-### google secret client id and client secret###
-client_secret_29030615791-ncm5kqeat32ul4u4sg0bpcm700jndji3.apps.googleusercontent.com.json
