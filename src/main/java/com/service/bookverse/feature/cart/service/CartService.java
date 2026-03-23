@@ -44,7 +44,7 @@ public class CartService {
 
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Book Not Found"));
 
-        CartItem cartItem = cartItemRepository.findByCartAndBook(cart,book).orElseThrow(() -> new RuntimeException("Item not found in cart"));
+        CartItem cartItem = cartItemRepository.findByCartAndBook(cart,book).orElse(null);
 
         if(cartItem != null) cartItem.setQuantity(cartItem.getQuantity() + quantity);
         else{

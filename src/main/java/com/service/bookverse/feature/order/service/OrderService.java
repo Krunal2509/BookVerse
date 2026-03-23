@@ -4,6 +4,8 @@ import com.service.bookverse.feature.auth.model.UserProfile;
 import com.service.bookverse.feature.cart.model.Cart;
 import com.service.bookverse.feature.cart.model.CartItem;
 import com.service.bookverse.feature.cart.repository.CartRepository;
+import com.service.bookverse.feature.order.dto.OrderItemDto;
+import com.service.bookverse.feature.order.dto.OrderResponseDto;
 import com.service.bookverse.feature.order.model.Order;
 import com.service.bookverse.feature.order.model.OrderItem;
 import com.service.bookverse.feature.order.model.OrderStatus;
@@ -68,7 +70,40 @@ public class OrderService {
         cartRepository.save(cart);
     }
 
-    public List<Order> getUserOrders(UserProfile userProfile) {
-        return orderRepository.findByUserProfile(userProfile);
+    public List<OrderResponseDto> getUserOrders(UserProfile userProfile) {
+
+        List<Order> orders = orderRepository.findByUserProfile(userProfile);
+
+        List<OrderResponseDto> responseList = new ArrayList<>();
+
+        for (Order order : orders) {
+
+            List<OrderItemDto> itemDtos = new ArrayList<>();
+
+            for (OrderItem item : order.getItems()) {
+
+                OrderItemDto dto = new OrderItemDto();
+                dto.setBookId(item.getBook().getId());
+                dto.setTitle(item.getBook().getTitle());
+                dto.setQuantity(item.getQuantity());
+                dto.setPrice(item.getBook().getPrice());
+
+                double total = item.getQuantity() * item.getBook().getPrice();
+                dto.setTotal(total);
+
+                itemDtos.add(dto);
+            }
+
+            OrderResponseDto response = new OrderResponseDto();
+            response.setOrderId(order.getId());
+            response.setItems(itemDtos);
+            response.setTotalAmount(order.getTotalAmount());
+            response.setStatus(order.getStatus().name());
+            response.setCreatedAt(order.getCreatedAt());
+
+            responseList.add(response);
+        }
+
+        return responseList;
     }
 }
