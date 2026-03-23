@@ -6,8 +6,10 @@ import com.service.bookverse.feature.cart.model.CartItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Integer> {
-    CartItem findByCartAndBook(Cart cart, Book book);
+    Optional<CartItem> findByCartAndBook(Cart cart, Book book);
 
 }

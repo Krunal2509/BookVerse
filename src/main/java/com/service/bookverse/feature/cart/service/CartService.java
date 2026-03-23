@@ -12,6 +12,7 @@ import com.service.bookverse.feature.cart.repository.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,20 +30,21 @@ public class CartService {
 
 
     public void addToCart(UserProfile userProfile, Integer bookId, Integer quantity){
-        Cart cart = cartRepository.findByUserProfile(userProfile).orElse(
-                cartRepository.save(
-                        Cart.builder()
-                                .userProfile(userProfile)
-                            .build()
-                )
-        );
+        Cart cart = cartRepository.findByUserProfile(userProfile)
+                .orElseGet(() ->
+                        cartRepository.save(
+                                Cart.builder()
+                                        .userProfile(userProfile)
+                                        .build()
+                        )
+                );
 
         cartRepository.save(cart);
 
 
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Book Not Found"));
 
-        CartItem cartItem = cartItemRepository.findByCartAndBook(cart,book);
+        CartItem cartItem = cartItemRepository.findByCartAndBook(cart,book).orElseThrow(() -> new RuntimeException("Item not found in cart"));
 
         if(cartItem != null) cartItem.setQuantity(cartItem.getQuantity() + quantity);
         else{
@@ -55,7 +57,6 @@ public class CartService {
         }
 
     }
-
 
     public CartResponseDto getCart(UserProfile userProfile) {
 
@@ -92,5 +93,43 @@ public class CartService {
         return response;
     }
 
+    public CartResponseDto removeItem(UserProfile userProfile, Integer bookId) {
 
+        Cart cart = cartRepository.findByUserProfile(userProfile)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        CartItem item = cartItemRepository.findByCartAndBook(cart, book)
+                .orElseThrow(() -> new RuntimeException("Item not found in cart"));
+
+        cart.getItems().remove(item);
+
+        cartRepository.save(cart);
+
+        return getCart(userProfile);
+    }
+
+    public CartResponseDto updateCartItem(UserProfile userProfile, Integer bookId, Integer quantity) {
+
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than 0");
+        }
+
+        Cart cart = cartRepository.findByUserProfile(userProfile)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        CartItem item = cartItemRepository.findByCartAndBook(cart, book)
+                .orElseThrow(() -> new RuntimeException("Item not found in cart"));
+
+        item.setQuantity(quantity);
+
+        cartRepository.save(cart);
+
+        return getCart(userProfile);
+    }
 }

@@ -43,4 +43,21 @@ public class CartController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/update")
+    public ResponseEntity<CartResponseDto> updateItem(@RequestParam Integer bookId,
+                                                      @RequestParam Integer quantity) {
+
+        UserProfile userProfile = securityUtil.getLoggedInUser();
+
+        return ResponseEntity.ok(cartService.updateCartItem(userProfile, bookId, quantity));
+    }
+
+    @DeleteMapping("/remove")
+    public ResponseEntity<CartResponseDto> removeItem(@RequestParam("bookId") Integer bookId) {
+
+        UserProfile userProfile = securityUtil.getLoggedInUser();
+
+        return ResponseEntity.ok(cartService.removeItem(userProfile, bookId));
+    }
 }
