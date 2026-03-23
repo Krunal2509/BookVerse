@@ -50,6 +50,7 @@ public class SecurityConfig
                             ).
                             httpBasic(Customizer.withDefaults()).
                             addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class).
+                            oauth2Login(Customizer.withDefaults()).
                             build();
 
     }

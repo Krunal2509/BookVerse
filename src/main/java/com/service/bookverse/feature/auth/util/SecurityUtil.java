@@ -30,11 +30,13 @@ public class SecurityUtil {
 
         return Jwts.builder()
                 .subject(userProfile.getUsername())
+
                 .claims()
-                .add(claims)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000*60*20)) // + 20mins
+                    .add(claims)
+                    .issuedAt(new Date(System.currentTimeMillis()))
+                    .expiration(new Date(System.currentTimeMillis() + 1000*60*20)) // + 20mins
                 .and()
+
                 .signWith(getSecretKey())
                 .compact();
     }
