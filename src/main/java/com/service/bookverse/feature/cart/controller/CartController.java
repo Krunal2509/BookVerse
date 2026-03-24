@@ -9,6 +9,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@PreAuthorize("hasAuthority('CART_MANAGE')")
 @RequestMapping("/cart")
 public class CartController {
 
@@ -24,6 +26,7 @@ public class CartController {
 
     @Autowired
     SecurityUtil securityUtil;
+
 
     @PostMapping("/add")
     public ResponseEntity<String> addToCart(@RequestParam("bookId") Integer bookId, @RequestParam("quantity") Integer quantity){

@@ -6,6 +6,7 @@ import com.service.bookverse.feature.order.dto.OrderResponseDto;
 import com.service.bookverse.feature.order.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,8 @@ public class OrderController {
     @Autowired
     private SecurityUtil securityUtil;
 
+
+    @PreAuthorize("hasAuthority('ORDER_MANAGE')")
     @PostMapping("/place")
     public ResponseEntity<String> placeOrder() {
 
@@ -33,6 +36,7 @@ public class OrderController {
         return ResponseEntity.ok("Order placed successfully");
     }
 
+    @PreAuthorize("hasAuthority('ORDER_MANAGE')")
     @GetMapping("/getOrders")
     public ResponseEntity<List<OrderResponseDto>> getOrders() {
 

@@ -36,6 +36,16 @@ public class UserProfile implements UserDetails
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("ADMIN"));
+
+        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+        roles.forEach(
+                roleType -> {
+                    Set<SimpleGrantedAuthority> permissions = RolePermissionMapping.getAuthorities(roleType);
+                    authorities.addAll(permissions);
+                    authorities.add(new SimpleGrantedAuthority("ROLE_"+roleType.name()));
+                }
+        );
+
+        return authorities;
     }
 }
