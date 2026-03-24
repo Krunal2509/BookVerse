@@ -5,9 +5,11 @@ import com.service.bookverse.feature.auth.dto.LoginRequestDto;
 import com.service.bookverse.feature.auth.dto.LoginResponseDto;
 import com.service.bookverse.feature.auth.dto.RegisterRequestDto;
 import com.service.bookverse.feature.auth.dto.RegisterResponseDto;
+import com.service.bookverse.feature.auth.model.RoleType;
 import com.service.bookverse.feature.auth.model.UserProfile;
 import com.service.bookverse.feature.auth.repository.UserRepository;
 import com.service.bookverse.feature.auth.util.SecurityUtil;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -34,19 +41,31 @@ public class UserService {
 
     public ResponseEntity<RegisterResponseDto> register(RegisterRequestDto req) {
 
-        UserProfile userProfile = userRepository.getUserProfileByUsername(req.getUsername()).orElse(null);
+        if (userRepository.getUserProfileByUsername(req.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("User Already Exists");
+        }
 
-        if(userProfile != null) throw new IllegalArgumentException("User Already Exists");
+        Set<RoleType> roles = (req.getRoles() != null) ? new HashSet<>(req.getRoles()) : new HashSet<>();
 
-        userRepository.save(new UserProfile(
-                                req.getUsername(),
-                                appConfig.getBcryptPasswordEncoder().encode(req.getPassword()),
-                                req.getRoles()));
+        if (roles.isEmpty()) {
+            roles.add(RoleType.BUYER);
+        }
 
-        return new ResponseEntity<>(new RegisterResponseDto(req.getUsername()),HttpStatus.OK);
+        UserProfile user = new UserProfile(
+                req.getUsername(),
+                appConfig.getBcryptPasswordEncoder().encode(req.getPassword()),
+                roles
+        );
+
+        userRepository.save(user);
+
+        return new ResponseEntity<>(
+                new RegisterResponseDto(user.getUsername()),
+                HttpStatus.CREATED
+        );
     }
 
-    public ResponseEntity<LoginResponseDto> login(LoginRequestDto request ) {
+    public ResponseEntity<LoginResponseDto> login(@NonNull LoginRequestDto request ) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
         if(authentication.isAuthenticated()){
